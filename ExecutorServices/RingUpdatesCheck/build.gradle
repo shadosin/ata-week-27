@@ -1,0 +1,41 @@
+plugins {
+    id 'ata-curriculum.snippets-conventions'
+    id 'ata-curriculum.integration-test-conventions'
+}
+
+dependencies {
+    implementation 'javax.inject:javax.inject:1'
+    implementation 'com.google.dagger:dagger:2.8'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.30'
+}
+
+checkstyle {
+    def suppressionFile = rootProject.file('Utilities/ATACheckstyle/configuration/checkstyle/unit1/suppressions.xml')
+    configProperties.put('checkstyle.suppression.filter', suppressionFile)
+}
+
+def wflowToTestsMap = [
+        'executorservices-ringupdatescheck-phase1-test': [
+                'com.kenzie.executorservices.ringupdatescheck.test.Phase1Test'
+        ],
+        'executorservices-ringupdatescheck-phase2-test': [
+                'com.kenzie.executorservices.ringupdatescheck.test.Phase2Test'
+        ],
+        'executorservices-ringupdatescheck-phase3-test': [
+                'com.kenzie.executorservices.ringupdatescheck.test.Phase3Test'
+        ],
+        'executorservices-ringupdatescheck-phase4-test': [
+                'com.kenzie.executorservices.ringupdatescheck.test.Phase4Test'
+        ]
+]
+
+wflowToTestsMap.forEach { wflowName, testList ->
+    tasks.register(wflowName) {
+        dependsOn wflowtest
+        test.doFirst {
+            filter {
+                testList.each { includeTestsMatching it }
+            }
+        }
+    }
+}
