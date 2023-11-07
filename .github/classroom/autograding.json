@@ -1,0 +1,134 @@
+{
+  "tests": [
+    {
+      "name": "Executor Services Notification Manager Test",
+      "setup": "",
+      "run": "./gradlew executorservices-notificationmanager-test  --rerun-tasks",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 11,
+      "points": 1
+    },
+    {
+      "name": "Executor Services Ring Updates Check Phase 1 Test",
+      "setup": "",
+      "run": "./gradlew executorservices-ringupdatescheck-phase1-test --rerun-tasks",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 1
+    },
+    {
+      "name": "Executor Services Ring Updates Check Phase 2 Test",
+      "setup": "",
+      "run": "./gradlew executorservices-ringupdatescheck-phase2-test --rerun-tasks",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 1
+    },
+    {
+      "name": "Executor Services Ring Updates Check Phase 3 Test",
+      "setup": "",
+      "run": "./gradlew executorservices-ringupdatescheck-phase3-test --rerun-tasks",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 1
+    },
+    {
+      "name": "Executor Services Ring Updates Check Phase 4 Test",
+      "setup": "",
+      "run": "./gradlew executorservices-ringupdatescheck-phase4-test  --rerun-tasks",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 1
+    },
+    {
+      "name": "Thread Safety Counter Test",
+      "setup": "",
+      "run": "./gradlew threadsafety-counter-racecounter-test  --rerun-tasks",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 1
+    },
+    {
+      "name": "Thread Safety Immutable Chat Message Test",
+      "setup": "",
+      "run": "./gradlew threadsafety-immutable-chatmessage-test  --rerun-tasks",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 1
+    },
+    {
+      "name": "Thread Safety Immutable Chat Message Content Test",
+      "setup": "",
+      "run": "./gradlew threadsafety-immutable-chatmessagecontent-test  --rerun-tasks",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 1
+    },
+    {
+      "name": "GroupWork Compliance Enforcer Phase 1 Test ",
+      "setup": "",
+      "run": "./gradlew groupwork-complianceenforcer-phase1-test --rerun-tasks",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 1
+    },
+    {
+      "name": "GroupWork Compliance Enforcer Phase 2 Test",
+      "setup": "",
+      "run": "./gradlew groupwork-complianceenforcer-phase2-test --rerun-tasks",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 1
+    },
+    {
+      "name": "ThreadSafety Ice Cream Phase 0 Test",
+      "setup": "",
+      "run": "./gradlew threadsafety-icecream-phase0-test --rerun-tasks",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 1
+    },
+    {
+      "name": "ThreadSafety IceCream Phase 1 Test",
+      "setup": "",
+      "run": "./gradlew threadsafety-icecream-phase1-test --rerun-tasks",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 1
+    },
+    {
+      "name": "ThreadSafety Ice Cream Phase 2 Test",
+      "setup": "",
+      "run": "./gradlew threadsafety-icecream-phase2-test  --rerun-tasks",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 1
+    }
+  ]
+}
