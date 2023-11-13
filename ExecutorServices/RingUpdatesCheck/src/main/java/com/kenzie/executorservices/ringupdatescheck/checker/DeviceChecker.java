@@ -1,8 +1,15 @@
 package com.kenzie.executorservices.ringupdatescheck.checker;
 
+import com.kenzie.executorservices.ringupdatescheck.model.customer.GetCustomerDevicesRequest;
+import com.kenzie.executorservices.ringupdatescheck.model.customer.GetCustomerDevicesResponse;
 import com.kenzie.executorservices.ringupdatescheck.model.devicecommunication.RingDeviceFirmwareVersion;
 import com.kenzie.executorservices.ringupdatescheck.customer.CustomerService;
 import com.kenzie.executorservices.ringupdatescheck.devicecommunication.RingDeviceCommunicatorService;
+import com.kenzie.executorservices.ringupdatescheck.model.devicecommunication.UpdateDeviceFirmwareRequest;
+
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Utility object for checking version status of devices, and updating
@@ -36,7 +43,16 @@ public class DeviceChecker {
      */
     public int checkDevicesIteratively(final String customerId, RingDeviceFirmwareVersion version) {
         // PARTICIPANTS: implement in Phase 2
-        return 0;
+        GetCustomerDevicesRequest request = GetCustomerDevicesRequest.builder().withCustomerId(customerId).build();
+        GetCustomerDevicesResponse response = customerService.getCustomerDevices(request);
+        List<String> devices = response.getDeviceIds();
+        int devicesChecked = 0;
+        for(String deviceId: devices){
+            DeviceCheckTask deviceCheckTask = new DeviceCheckTask(this, deviceId, version);
+            deviceCheckTask.run();
+            devicesChecked ++;
+        }
+        return devicesChecked;
     }
 
     /**
@@ -47,7 +63,19 @@ public class DeviceChecker {
      */
     public int checkDevicesConcurrently(final String customerId, RingDeviceFirmwareVersion version) {
         // PARTICIPANTS: implement in Phase 3
-        return 0;
+        ExecutorService service = Executors.newCachedThreadPool();
+        GetCustomerDevicesRequest request = GetCustomerDevicesRequest.builder().withCustomerId(customerId).build();
+        GetCustomerDevicesResponse response = customerService.getCustomerDevices(request);
+        List<String> devices = response.getDeviceIds();
+        int devicesChecked = 0;
+        for(String deviceId: devices){
+            DeviceCheckTask deviceCheckTask = new DeviceCheckTask(this, deviceId, version);
+            service.submit(deviceCheckTask);
+            devicesChecked ++;
+        }
+        service.shutdown();
+        return devicesChecked;
+
     }
 
     /**
@@ -59,6 +87,12 @@ public class DeviceChecker {
         System.out.println(String.format("[DeviceChecker] Updating device %s to version %s", deviceId, version));
 
         // PARTICIPANTS: add remaining implementation here in Phase 4
+        ExecutorService service = Executors.newCachedThreadPool();
+        service.submit(() -> {
+            ringDeviceCommunicatorService.updateDeviceFirmware(
+                    UpdateDeviceFirmwareRequest.builder().withDeviceId(deviceId).withVersion(version).build());
+        });
+        service.shutdown();
     }
 
     public CustomerService getCustomerService() {

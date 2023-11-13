@@ -1,6 +1,10 @@
 package com.kenzie.executorservices.ringupdatescheck.checker;
 
 import com.kenzie.executorservices.ringupdatescheck.devicecommunication.RingDeviceCommunicatorService;
+import com.kenzie.executorservices.ringupdatescheck.model.devicecommunication.GetDeviceSystemInfoRequest;
+import com.kenzie.executorservices.ringupdatescheck.model.devicecommunication.GetDeviceSystemInfoResponse;
+import com.kenzie.executorservices.ringupdatescheck.model.devicecommunication.RingDeviceFirmwareVersion;
+import com.kenzie.executorservices.ringupdatescheck.util.RingDeviceFirmwareVersionComparator;
 
 /**
  * A task to check a single device's version against a desired latest
@@ -8,9 +12,12 @@ import com.kenzie.executorservices.ringupdatescheck.devicecommunication.RingDevi
  *
  * PARTICIPANTS: Implement this class in Phase 1
  */
-public class DeviceCheckTask {
+public class DeviceCheckTask implements Runnable{
     private RingDeviceCommunicatorService ringDeviceCommunicatorService;
     private DeviceChecker deviceChecker;
+    private String deviceId;
+    private RingDeviceFirmwareVersion version;
+    private RingDeviceFirmwareVersionComparator comparator = new RingDeviceFirmwareVersionComparator();
 
     /**
      * Constructs a DeviceCheckTask with the given dependencies and parameters.
@@ -20,8 +27,19 @@ public class DeviceCheckTask {
      *
      * @param deviceChecker The DeviceChecker to use while executing this task
      */
-    public DeviceCheckTask(DeviceChecker deviceChecker) {
+    public DeviceCheckTask(DeviceChecker deviceChecker, String deviceId, RingDeviceFirmwareVersion version) {
         this.ringDeviceCommunicatorService = deviceChecker.getRingDeviceCommunicatorService();
         this.deviceChecker = deviceChecker;
+        this.deviceId = deviceId;
+        this.version = version;
+    }
+
+    @Override
+    public void run() {
+        GetDeviceSystemInfoRequest request = GetDeviceSystemInfoRequest.builder().withDeviceId(deviceId).build();
+        GetDeviceSystemInfoResponse response = ringDeviceCommunicatorService.getDeviceSystemInfo(request);
+       if(comparator.compare(response.getSystemInfo().getDeviceFirmwareVersion(), version) < 0){
+           deviceChecker.updateDevice(deviceId, version);
+       }
     }
 }

@@ -14,6 +14,11 @@ import com.kenzie.executorservices.ringupdatescheck.util.KnownRingDeviceFirmware
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 public class ComplianceEnforcer {
     private final CustomerService customerService;
@@ -42,7 +47,8 @@ public class ComplianceEnforcer {
         List<String> deviceIds = getCustomerDevices(customerId);
 
         // Find the version of each device
-        List<RingDeviceSystemInfo> deviceInfo = getInfoForDevices(deviceIds);
+        List<RingDeviceSystemInfo> deviceInfo = null;
+        deviceInfo = getInfoForDevices(deviceIds);
 
         // Check whether each device meets the minimum approved version
         List<String> nonCompliantDevices = collectNonCompliantDevices(deviceInfo, approved);
@@ -85,13 +91,26 @@ public class ComplianceEnforcer {
      */
     private List<RingDeviceSystemInfo> getInfoForDevices(List<String> deviceIds) {
         List<RingDeviceSystemInfo> deviceInfo = new ArrayList<>();
-        for (String deviceId : deviceIds) {
-            GetDeviceSystemInfoRequest versionRequest = GetDeviceSystemInfoRequest.builder()
-                    .withDeviceId(deviceId)
-                    .build();
-            GetDeviceSystemInfoResponse infoResponse = ringClient.getDeviceSystemInfo(versionRequest);
-            deviceInfo.add(infoResponse.getSystemInfo());
+        ExecutorService service = Executors.newCachedThreadPool();
+        List<Future<RingDeviceSystemInfo>> futures = deviceIds.stream()
+                .map(deviceId -> service.submit(() -> {
+                    GetDeviceSystemInfoRequest request =
+                            GetDeviceSystemInfoRequest.builder().withDeviceId(deviceId).build();
+                    GetDeviceSystemInfoResponse infoResponse = ringClient.getDeviceSystemInfo(request);
+                    return infoResponse.getSystemInfo();
+                }))
+                .toList();
+        for(Future<RingDeviceSystemInfo> future : futures){
+            RingDeviceSystemInfo info = null;
+            try {
+                info = future.get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+            deviceInfo.add(info);
         }
+
+        service.shutdown();
         return deviceInfo;
     }
 
@@ -116,14 +135,29 @@ public class ComplianceEnforcer {
     private List<UpdateDeviceFirmwareResponse> triggerUpdates(List<String> nonCompliantDeviceIds,
                                                               RingDeviceFirmwareVersion latest) {
         List<UpdateDeviceFirmwareResponse> updateStatuses = new ArrayList<>();
-        for (String deviceId : nonCompliantDeviceIds) {
-            UpdateDeviceFirmwareRequest updateRequest = UpdateDeviceFirmwareRequest.builder()
-                    .withDeviceId(deviceId)
-                    .withVersion(latest)
-                    .build();
-            UpdateDeviceFirmwareResponse updateResponse = ringClient.updateDeviceFirmware(updateRequest);
-            updateStatuses.add(updateResponse);
+        List<Future<UpdateDeviceFirmwareResponse>> futureStatuses = new ArrayList<>();
+        ExecutorService service = Executors.newCachedThreadPool();
+
+        for(String deviceId: nonCompliantDeviceIds){
+            Future<UpdateDeviceFirmwareResponse> future = service.submit(()-> {
+                UpdateDeviceFirmwareRequest updateRequest = UpdateDeviceFirmwareRequest.builder()
+                        .withDeviceId(deviceId)
+                        .withVersion(latest)
+                        .build();
+                return ringClient.updateDeviceFirmware(updateRequest);
+            });
+
+            futureStatuses.add(future);
         }
+        futureStatuses.forEach(future -> {
+            try {
+                UpdateDeviceFirmwareResponse updateDeviceFirmwareResponse = future.get();
+                updateStatuses.add(updateDeviceFirmwareResponse);
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        service.shutdown();
         return updateStatuses;
     }
 

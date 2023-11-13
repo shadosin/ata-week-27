@@ -1,8 +1,8 @@
 package com.kenzie.threadsafety.immutable;
 
-public class ChatMessage implements Runnable {
-    public ChatUser recipient;
-    public ChatMessageContent messageContent;
+public final class ChatMessage implements Runnable {
+    private final ChatUser recipient;
+    private final ChatMessageContent messageContent;
 
     /**
      *
@@ -11,7 +11,8 @@ public class ChatMessage implements Runnable {
      */
     public ChatMessage(ChatUser recipient, ChatMessageContent messageContent) {
         this.recipient = recipient;
-        this.messageContent = messageContent;
+        this.messageContent = new ChatMessageContent(messageContent.getSender()
+        , messageContent.getMessage(), messageContent.getCreationDate());
     }
 
     public ChatUser getRecipient() {

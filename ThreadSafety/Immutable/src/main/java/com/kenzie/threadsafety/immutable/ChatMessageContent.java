@@ -2,10 +2,10 @@ package com.kenzie.threadsafety.immutable;
 
 import java.util.Date;
 
-public class ChatMessageContent {
-    public ChatUser sender;
-    public String message;
-    public Date creationDate;
+public final class ChatMessageContent {
+    private final ChatUser sender;
+    private final String message;
+    private final Date creationDate;
 
     /**
      *
@@ -14,9 +14,9 @@ public class ChatMessageContent {
      * @param creationDate date the message was created
      */
     public ChatMessageContent(ChatUser sender, String message, Date creationDate) {
-        this.sender = sender;
+        this.sender = new ChatUser(sender.getUsername(), sender.getUserId());
         this.message = message;
-        this.creationDate = creationDate;
+        this.creationDate = new Date(creationDate.getTime());
     }
 
     public ChatUser getSender() {
@@ -28,6 +28,8 @@ public class ChatMessageContent {
     }
 
     public Date getCreationDate() {
-        return creationDate;
+        return new Date(creationDate.getTime());
     }
+
+
 }
